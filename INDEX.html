@@ -1,0 +1,674 @@
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معهد سما العلوم العالي والمتوسط - الاستعلام عن النتائج</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            background: #fff;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+        }
+        /* رأس الصفحة والشعار */
+        .header {
+            margin-bottom: 25px;
+        }
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            background: #007bff;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 15px auto;
+            box-shadow: 0px 4px 8px rgba(0,123,255,0.3);
+        }
+        .header h1 {
+            color: #2c3e50;
+            font-size: 22px;
+            margin: 5px 0;
+        }
+        .header p {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin: 0;
+        }
+        /* قسم التخصصات */
+        .departments {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .dept-tag {
+            background: #e9ecef;
+            color: #495057;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+            text-align: right;
+            line-height: 1.6;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- رأس الصفحة والشعار -->
+    <div class="header">
+        <!-- يمكنك استبدال العنصر أدناه بوسم صورة <img src="logo.png" alt="شعار المعهد"> لو كان لديك شعار بصيغة صورة -->
+        <img src="logo.png" alt="شعار معهد سما العلوم" style="width: 90px; height: auto; margin-bottom: 10px;">
+        <h1>معهد سما العلوم العالي والمتوسط</h1>
+        <p>نظام الاستعلام عن النتائج الدراسية</p>
+        
+        <!-- التخصصات -->
+        <div class="departments">
+            <span class="dept-tag">تقنية معلومات</span>
+            <span class="dept-tag">إدارة أعمال</span>
+            <span class="dept-tag">محاسبة</span>
+            <span class="dept-tag">اللغات</span>
+        </div>
+    </div>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <p style="color: #555; font-size: 15px;">أدخل رقم القيد أو اسم الطالب للبحث</p>
+    
+    <input type="text" id="searchInput" placeholder="أدخل رقم القيد أو الاسم ...">
+    <button onclick="searchResult()">عرض النتيجة</button>
+
+    <div id="resultBox" class="result-box"></div>
+</div>
+<script>    // قاعدة بيانات الطلاب
+    const studentsDatabase = [
+        { id: "1691", name: "محمد حمد ناجي الشهيبي", grade: "ممتاز", percentage: "85.50%", hasDebt: true },
+        { id: "1700", name: "فاطمه عمر محمد زعطوط", grade: "ممتاز", percentage: "81.88%", hasDebt: false },
+        { id: "1701", name: "محمد ونيس سعد اسويري", grade: "ممتاز", percentage: "82.09%", hasDebt: false },
+        { id: "1702", name: "بهاء الدين ابراهيم عبدالسلام الدرسي", grade: "ممتاز", percentage: "84.00%", hasDebt: true },
+        { id: "1703", name: "عبدالكريم منصور عبدالكريم علي", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1704", name: "احمد صالح محمد ابراهيم", grade: "ممتاز", percentage: "79.41%", hasDebt: true },
+        { id: "1705", name: "حنان سالم عمار رمضان", grade: "ممتاز", percentage: "81.81%", hasDebt: true },
+        { id: "1706", name: "مسعودة عبدالرحيم فضل الله عصمان", grade: "ممتاز", percentage: "90.75%", hasDebt: false },
+        { id: "1707", name: "اشرف خالد يونس العبيدي", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1709", name: "خديجة خليفه عمران البوري", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1710", name: "اسماء مرعي عيسى الفاخري", grade: "ممتاز", percentage: "91.78%", hasDebt: false },
+        { id: "1716", name: "احمد عادل امبارك امبارك", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1748", name: "عبدالهادى مسعود عبدالهادى عبدالله", grade: "ممتاز", percentage: "83.88%", hasDebt: true },
+        { id: "1751", name: "زكريا سراج الدين صالح حماد", grade: "ممتاز", percentage: "81.81%", hasDebt: false },
+        { id: "1752", name: "صهيب جمال عبدالله محمد", grade: "ممتاز", percentage: "74.91%", hasDebt: true },
+        { id: "1756", name: "الحسن جمعه صالح الككلى", grade: "ممتاز", percentage: "74.44%", hasDebt: true },
+        { id: "1785", name: "ملك وليد مفتاح السعداوي", grade: "ممتاز", percentage: "84.03%", hasDebt: false },
+        { id: "1760", name: "الاء عوض عبدالسلام البركي", grade: "ممتاز", percentage: "82.75%", hasDebt: false },
+        { id: "1761", name: "هديل محمود رضا محمد فرج الله", grade: "ممتاز", percentage: "81.16%", hasDebt: false },
+        { id: "1762", name: "فاطمة فرج جبريل الشكري", grade: "ممتاز", percentage: "78.84%", hasDebt: false },
+        { id: "1769", name: "ثناء خالد فضل الله الشيخي", grade: "ممتاز", percentage: "71.34%", hasDebt: true },
+        { id: "1770", name: "وليد صالح عبدالعالي محمود", grade: "ممتاز", percentage: "72.38%", hasDebt: true },
+        { id: "1771", name: "مروان وصفى طاهر الجحاوي", grade: "ممتاز", percentage: "75.75%", hasDebt: true },
+        { id: "1778", name: "الاء على محمد حسن", grade: "ممتاز", percentage: "75.94%", hasDebt: true },
+        { id: "1779", name: "اسراء محمد صالح الفرجاني", grade: "ممتاز", percentage: "86.75%", hasDebt: false },
+        { id: "1781", name: "مريم احمد محمود الزوي", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1782", name: "عبدالرحمن مرعى يوسف المغربي", grade: "ممتاز", percentage: "78.63%", hasDebt: true },
+        { id: "1783", name: "شعيب امجاور فرج الشنيبي", grade: "ممتاز", percentage: "83.13%", hasDebt: true },
+        { id: "1784", name: "ناجي طارق السنوسي المشيطي", grade: "ممتاز", percentage: "84.56%", hasDebt: true },
+        { id: "1787", name: "ابراهيم ونيس ابراهيم العرفي", grade: "ممتاز", percentage: "72.31%", hasDebt: true },
+        { id: "1788", name: "على محمد بوبكر محمود خليفه", grade: "ممتاز", percentage: "71.59%", hasDebt: true },
+        { id: "478", name: "امراجع امحمد امراجع الذويب", grade: "ممتاز", percentage: "87.00%", hasDebt: false },
+        { id: "479", name: "سالم على سالم هويدى", grade: "ممتاز", percentage: "83.84%", hasDebt: false },
+        { id: "487", name: "وسام الصديق ميلاد سعد", grade: "ممتاز", percentage: "84.16%", hasDebt: false },
+        { id: "488", name: "رغد فتحى عبدالرحمن عيسى", grade: "ممتاز", percentage: "79.72%", hasDebt: false },
+        { id: "489", name: "امجد سليمان جمعه مصباح", grade: "ممتاز", percentage: "66.25%", hasDebt: true },
+        { id: "492", name: "ياسين عبدالباسط صالح يونس", grade: "ممتاز", percentage: "69.22%", hasDebt: true },
+        { id: "497", name: "سفيان سالم محمد بوزيد", grade: "ممتاز", percentage: "69.91%", hasDebt: true },
+        { id: "499", name: "عبدالرؤوف جمعه صالح غيضان", grade: "ممتاز", percentage: "78.09%", hasDebt: true },
+        { id: "500", name: "سفيان عمر سعيد سعد الحاسى", grade: "ممتاز", percentage: "79.13%", hasDebt: false },
+        { id: "507", name: "طارق وليد محمد بن غشير", grade: "ممتاز", percentage: "85.00%", hasDebt: true },
+        { id: "508", name: "محمد عاشور خليفه ماضى", grade: "ممتاز", percentage: "86.97%", hasDebt: false },
+        { id: "509", name: "ايوب على محمد الشيخي", grade: "ممتاز", percentage: "70.25%", hasDebt: true },
+        { id: "510", name: "علي خالد حسن الفلاح", grade: "ممتاز", percentage: "83.13%", hasDebt: false },
+        { id: "511", name: "سالم وسام عاشور محمد صالح", grade: "ممتاز", percentage: "85.53%", hasDebt: false },
+        { id: "512", name: "عبدالمعز خالد حسين الطاهر", grade: "ممتاز", percentage: "86.13%", hasDebt: false },
+        { id: "513", name: "ايوب فوزي محمود محمد", grade: "ممتاز", percentage: "85.13%", hasDebt: false },
+        { id: "514", name: "وعد المهدى حمد الزيداني", grade: "ممتاز", percentage: "77.94%", hasDebt: true },
+        { id: "518", name: "لمياء عادل عمر الشريف", grade: "ممتاز", percentage: "73.94%", hasDebt: true },
+        { id: "523", name: "محمد حمد رمضان الشيخي", grade: "ممتاز", percentage: "76.91%", hasDebt: true },
+        { id: "524", name: "محمد احمد خليل العريبي", grade: "راسب", percentage: "40.69%", hasDebt: true },
+        { id: "533", name: "سليم جلال سليم على", grade: "ممتاز", percentage: "79.56%", hasDebt: true },
+        { id: "534", name: "محمد سامي محمد خليل", grade: "ممتاز", percentage: "72.69%", hasDebt: true },
+        { id: "535", name: "هديل محمود عمر البيجو", grade: "ممتاز", percentage: "79.88%", hasDebt: false },
+        { id: "536", name: "هنية صالح حسن حسين", grade: "ممتاز", percentage: "72.47%", hasDebt: true },
+        { id: "537", name: "عمر عبدالعاطي عمر بن موسى", grade: "ممتاز", percentage: "87.28%", hasDebt: false },
+        { id: "538", name: "مفتاح عبدالرحمن خليفه العقوري", grade: "ممتاز", percentage: "73.81%", hasDebt: true },
+        { id: "539", name: "عبدالفتاح يونس غومه عبدالسيد", grade: "ممتاز", percentage: "75.22%", hasDebt: false },
+        { id: "1590", name: "رحيل رافع عمر العماري", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1608", name: "عزه حمزه سليمان احميده", grade: "ممتاز", percentage: "87.98%", hasDebt: true },
+        { id: "1647", name: "محمد فهيم محمد مصطفي", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1648", name: "مصطفي الوداوي محمد رمضان اشتيوي", grade: "ممتاز", percentage: "78.87%", hasDebt: true },
+        { id: "1649", name: "فيصل ادريس سعد عقيل", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1650", name: "على الغمارى على اخنيفر", grade: "ممتاز", percentage: "80.34%", hasDebt: true },
+        { id: "1651", name: "هبه عبدالله اهليل عطيه", grade: "ممتاز", percentage: "85.13%", hasDebt: false },
+        { id: "1652", name: "هناء عبدالجواد فرج مفتاح", grade: "ممتاز", percentage: "78.77%", hasDebt: true },
+        { id: "1653", name: "ناديه ابراهيم علي الاشل", grade: "ممتاز", percentage: "88.53%", hasDebt: false },
+        { id: "1554", name: "مروه عبدالستار ابراهيم مجاور", grade: "ممتاز", percentage: "90.30%", hasDebt: false },
+        { id: "1655", name: "امينه ادريس سعد الطيرة", grade: "ممتاز", percentage: "84.53%", hasDebt: false },
+        { id: "1656", name: "فاطمة يوسف مصطفى السنوسى", grade: "ممتاز", percentage: "86.89%", hasDebt: false },
+        { id: "1657", name: "عبدالعزيز مرعي عبدالعزيز على محمد", grade: "ممتاز", percentage: "90.19%", hasDebt: false },
+        { id: "1658", name: "محمد صالح محمد القطراني", grade: "ممتاز", percentage: "81.83%", hasDebt: false },
+        { id: "1659", name: "رجب يوسف رجب ماضى", grade: "ممتاز", percentage: "81.60%", hasDebt: false },
+        { id: "1660", name: "اسامة مسعود محمد العمامي", grade: "ممتاز", percentage: "80.15%", hasDebt: true },
+        { id: "1661", name: "انس اسامة عقيلة غيضان", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1662", name: "حمزه يوسف علي بيت المال", grade: "ممتاز", percentage: "91.83%", hasDebt: false },
+        { id: "1663", name: "عبدالرحمن علي المهدي المرابط", grade: "ممتاز", percentage: "80.30%", hasDebt: true },
+        { id: "1664", name: "معاذ ابراهيم محمد اجويلي", grade: "ممتاز", percentage: "77.64%", hasDebt: true },
+        { id: "1670", name: "محمد مصطفى محمد ضوالليل", grade: "ممتاز", percentage: "75.91%", hasDebt: true },
+        { id: "1672", name: "محمد عبدالله محمد ابراهيم الطابوني", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1673", name: "محمد صالح عبدالله البركي", grade: "ممتاز", percentage: "75.47%", hasDebt: true },
+        { id: "1676", name: "عبدالكبير كيلانى المهدى المرابط", grade: "ممتاز", percentage: "76.53%", hasDebt: true },
+        { id: "1677", name: "هاله احمد محمد صالح الجدى", grade: "ممتاز", percentage: "85.55%", hasDebt: false },
+        { id: "1678", name: "رواسي يوسف على شوشان", grade: "ممتاز", percentage: "84.89%", hasDebt: true },
+        { id: "1690", name: "محمد الواليد محمد الروماني", grade: "ممتاز", percentage: "81.91%", hasDebt: true },
+        { id: "1692", name: "انس فرحات محمدعلي", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "2031", name: "معتز فتحى بشير الاربد", grade: "ممتاز", percentage: "83.51%", hasDebt: false },
+        { id: "434", name: "نسيم بوبكر عطية السعيطى", grade: "ممتاز", percentage: "86.32%", hasDebt: false },
+        { id: "438", name: "معتز محمود امهيدي العبيدي", grade: "ممتاز", percentage: "88.19%", hasDebt: false },
+        { id: "450", name: "بشير احمد بشير قرمان", grade: "ممتاز", percentage: "85.17%", hasDebt: true },
+        { id: "452", name: "حسن نوري موسى العبيدي", grade: "ممتاز", percentage: "84.34%", hasDebt: false },
+        { id: "454", name: "مروان انور محمد الفيتوري", grade: "ممتاز", percentage: "93.47%", hasDebt: false },
+        { id: "455", name: "محمد رجب عبدالعزيز شرفاد", grade: "ممتاز", percentage: "83.36%", hasDebt: false },
+        { id: "468", name: "موسى سعد موسى طاهر بالقاسم", grade: "ممتاز", percentage: "83.23%", hasDebt: false },
+        { id: "1485", name: "رمضان محمد رمضان بورزيزه", grade: "ممتاز", percentage: "81.81%", hasDebt: true },
+        { id: "356", name: "اشرف محمود عثمان سالم", grade: "ممتاز", percentage: "81.73%", hasDebt: true },
+        { id: "1511", name: "فضيل خليفة ابراهيم رجب", grade: "ممتاز", percentage: "79.22%", hasDebt: false },
+        { id: "1512", name: "ايمن عثمان حسين علاله", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1514", name: "على محمد خميس قاسم", grade: "ممتاز", percentage: "83.31%", hasDebt: true },
+        { id: "1515", name: "محمد سليمان مفتاح حسن", grade: "ممتاز", percentage: "78.35%", hasDebt: true },
+        { id: "1539", name: "احمد نجم الدين شعبان صالح الشريف", grade: "ممتاز", percentage: "81.25%", hasDebt: true },
+        { id: "1540", name: "صبا عبدالحميد يونس حمى", grade: "ممتاز", percentage: "77.83%", hasDebt: true },
+        { id: "1555", name: "صلاح الدين ياسر معوض ابوحوية", grade: "ممتاز", percentage: "82.59%", hasDebt: true },
+        { id: "1558", name: "نزار رجب سالم مختار", grade: "ممتاز", percentage: "83.06%", hasDebt: true },
+        { id: "1559", name: "الحسن عمران عمر طنش", grade: "ممتاز", percentage: "81.68%", hasDebt: true },
+        { id: "1560", name: "الحسين عمران عمر طنش", grade: "ممتاز", percentage: "81.08%", hasDebt: true },
+        { id: "1561", name: "عبدالرحمن يحى محمد ابوراوي", grade: "ممتاز", percentage: "82.51%", hasDebt: true },
+        { id: "1572", name: "شهد فرج محمد حمد", grade: "ممتاز", percentage: "85.69%", hasDebt: true },
+        { id: "1575", name: "مالك خميس على علي", grade: "ممتاز", percentage: "84.03%", hasDebt: true },
+        { id: "2011", name: "مبروكة علي صالح الورفلي", grade: "ممتاز", percentage: "86.83%", hasDebt: true },
+        { id: "2014", name: "الهام مفتاح الزروق بودبوس", grade: "ممتاز", percentage: "80.63%", hasDebt: true },
+        { id: "387", name: "سالمين عطيه مفتاح اصقوع", grade: "ممتاز", percentage: "86.81%", hasDebt: false },
+        { id: "388", name: "سراج صلاح الدين رمضان القعود", grade: "ممتاز", percentage: "79.60%", hasDebt: true },
+        { id: "389", name: "امبارك سعيد امبارك العقيلي", grade: "ممتاز", percentage: "82.33%", hasDebt: true },
+        { id: "393", name: "شهد يوسف على محمد", grade: "ممتاز", percentage: "85.61%", hasDebt: false },
+        { id: "394", name: "فاطمة عبدالرسول ابوالقاسم محمد", grade: "ممتاز", percentage: "79.00%", hasDebt: true },
+        { id: "395", name: "محمد صلاح سعيد السراوى", grade: "ممتاز", percentage: "75.76%", hasDebt: true },
+        { id: "404", name: "علي صلاح فرج بن سعود", grade: "ممتاز", percentage: "80.47%", hasDebt: true },
+        { id: "405", name: "عبدالرحيم ياسين عبدالرحيم الشكماك", grade: "ممتاز", percentage: "83.13%", hasDebt: true },
+        { id: "406", name: "عبدالحكيم حمدى عبدالله امعيزيق", grade: "ممتاز", percentage: "83.20%", hasDebt: false },
+        { id: "408", name: "عبدالرؤوف احمد عيسى المغربي", grade: "ممتاز", percentage: "83.00%", hasDebt: true },
+        { id: "409", name: "موسى مفتاح عمر العريبي", grade: "ممتاز", percentage: "80.29%", hasDebt: true },
+        { id: "1473", name: "ابراهيم محمد رمضان محمد", grade: "ممتاز", percentage: "69.22%", hasDebt: true },
+        { id: "1475", name: "محمد احمد سليمان علي", grade: "ممتاز", percentage: "64.07%", hasDebt: false },
+        { id: "1476", name: "سند صابر السنوسي بالقاسم", grade: "ممتاز", percentage: "71.37%", hasDebt: false },
+        { id: "1477", name: "عبدالسلام حبيب عبدالسلام حبيب", grade: "ممتاز", percentage: "85.07%", hasDebt: false },
+        { id: "1478", name: "مسعود عبدالهادي عبدالكريم الدرسي", grade: "ممتاز", percentage: "67.38%", hasDebt: false },
+        { id: "1479", name: "محمود عرابي احمد العنيزي", grade: "ممتاز", percentage: "65.33%", hasDebt: false },
+        { id: "1480", name: "محمد مفتاح حمد عبدالحفيظ", grade: "ممتاز", percentage: "67.55%", hasDebt: false },
+        { id: "1481", name: "اسماعيل عرابي احمد العنيزي", grade: "ممتاز", percentage: "84.71%", hasDebt: false },
+        { id: "1482", name: "صفاء فتحى على الفيتوري", grade: "ممتاز", percentage: "66.05%", hasDebt: true },
+        { id: "1483", name: "محمد احمدجبريل العرفى", grade: "ممتاز", percentage: "66.73%", hasDebt: false },
+        { id: "1484", name: "سالم عبدالله سالم التائب", grade: "ممتاز", percentage: "68.34%", hasDebt: true },
+        { id: "1486", name: "محمد فرج محمد العبيدي", grade: "ممتاز", percentage: "67.42%", hasDebt: false },
+        { id: "1487", name: "خديجة حسين فرج البدري", grade: "ممتاز", percentage: "74.95%", hasDebt: true },
+        { id: "1488", name: "رغد رشدي على الحبوني", grade: "ممتاز", percentage: "76.49%", hasDebt: true },
+        { id: "1489", name: "عبدالوهاب محمد عبدالرسول طاهر", grade: "ممتاز", percentage: "72.32%", hasDebt: false },
+        { id: "1490", name: "ايه غنيوه فرج مفتاح", grade: "ممتاز", percentage: "70.93%", hasDebt: true },
+        { id: "1508", name: "عبدالرحمن نصر عبدالله العبيدي", grade: "ممتاز", percentage: "69.78%", hasDebt: false },
+        { id: "1509", name: "حسن محمد على عيسى", grade: "ممتاز", percentage: "70.54%", hasDebt: false },
+        { id: "1581", name: "محمد خالد عبدالهادي خليفه", grade: "ممتاز", percentage: "81.70%", hasDebt: true },
+        { id: "1582", name: "ريم رجب عمر محمد", grade: "ممتاز", percentage: "66.90%", hasDebt: false },
+        { id: "358", name: "يوسف عثمان رشيد المغربي", grade: "ممتاز", percentage: "68.01%", hasDebt: true },
+        { id: "359", name: "هبة احمد خليفة امجاهد", grade: "ممتاز", percentage: "73.08%", hasDebt: true },
+        { id: "360", name: "سالم محمد سالم الزوبيك", grade: "ممتاز", percentage: "70.92%", hasDebt: true },
+        { id: "364", name: "امجد عبدالحفيظ جمعة المنصوري", grade: "ممتاز", percentage: "68.75%", hasDebt: true },
+        { id: "367", name: "صالح المهدي محمد الفلاح", grade: "ممتاز", percentage: "71.59%", hasDebt: true },
+        { id: "368", name: "المقداد محمد سليمان الورفلي", grade: "ممتاز", percentage: "71.24%", hasDebt: true },
+        { id: "370", name: "جلال محمد على خالد", grade: "ممتاز", percentage: "71.52%", hasDebt: true },
+        { id: "371", name: "جمال محمد على خالد", grade: "ممتاز", percentage: "72.85%", hasDebt: true },
+        { id: "372", name: "محمد طارق محمد اطوير", grade: "ممتاز", percentage: "66.59%", hasDebt: true },
+        { id: "373", name: "حنان محمد المبروك البرشة", grade: "ممتاز", percentage: "73.62%", hasDebt: true },
+        { id: "374", name: "محمد فرج على العريبي", grade: "ممتاز", percentage: "67.02%", hasDebt: true },
+        { id: "375", name: "عبد الرحمن عادل مفتاح البصير", grade: "ممتاز", percentage: "70.15%", hasDebt: true },
+        { id: "376", name: "نبيل منعم محمد العريبي", grade: "ممتاز", percentage: "67.67%", hasDebt: true },
+        { id: "378", name: "عائشة ناجي محمد مختار", grade: "ممتاز", percentage: "67.55%", hasDebt: true },
+        { id: "383", name: "احمد مختار مصباح الفيتوري", grade: "ممتاز", percentage: "71.79%", hasDebt: true },
+        { id: "1711", name: "عبدالله حامد عبدالله بوجواري", grade: "ممتاز", percentage: "81.13%", hasDebt: true },
+        { id: "1712", name: "معتز عبدالعالى محمد الفرجاني", grade: "ممتاز", percentage: "83.16%", hasDebt: true },
+        { id: "1713", name: "سند فرج محمد بن عامر", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1714", name: "محمد على عبدالله الجطلاوي", grade: "ممتاز", percentage: "81.47%", hasDebt: true },
+        { id: "1715", name: "محمد خالد عبدالعزيز الحنبولى", grade: "ممتاز", percentage: "75.84%", hasDebt: true },
+        { id: "1717", name: "مفتاح على مفتاح الهدار", grade: "ممتاز", percentage: "83.16%", hasDebt: true },
+        { id: "1718", name: "اسماعيل صالح يوسف ادريس", grade: "ممتاز", percentage: "79.24%", hasDebt: true },
+        { id: "1719", name: "احمد عبدالباسط فرج افريخ", grade: "ممتاز", percentage: "76.82%", hasDebt: true },
+        { id: "1720", name: "محمد عبدالرازق المهدي عيسى", grade: "ممتاز", percentage: "80.84%", hasDebt: true },
+        { id: "1721", name: "ياسر فرج عبدالحميد القطعاني", grade: "ممتاز", percentage: "86.42%", hasDebt: true },
+        { id: "1722", name: "عبدالرحيم على ابراهيم الطابوني", grade: "ممتاز", percentage: "70.13%", hasDebt: false },
+        { id: "1723", name: "على اسامة على احمد حبريشه", grade: "ممتاز", percentage: "73.39%", hasDebt: true },
+        { id: "1724", name: "محمد ميلاد محمد الزمزام", grade: "ممتاز", percentage: "68.84%", hasDebt: true },
+        { id: "1725", name: "محمد صالح محمد العرفي", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1726", name: "مازن ماهر جمعه عبدالله", grade: "ممتاز", percentage: "85.29%", hasDebt: true },
+        { id: "1727", name: "باسل محمد حسنى احمد", grade: "ممتاز", percentage: "79.95%", hasDebt: true },
+        { id: "1728", name: "احمد رجب عبدالسلام الشيخي", grade: "ممتاز", percentage: "79.45%", hasDebt: true },
+        { id: "1729", name: "نجوى سليمان محمد ابراهيم", grade: "ممتاز", percentage: "91.66%", hasDebt: false },
+        { id: "1730", name: "روان طارق الشعالي سميو", grade: "ممتاز", percentage: "87.76%", hasDebt: false },
+        { id: "1731", name: "ايه رشدي علي الحبوني", grade: "ممتاز", percentage: "83.45%", hasDebt: true },
+        { id: "1732", name: "رغد فرج رجب الفيتوري", grade: "ممتاز", percentage: "79.50%", hasDebt: true },
+        { id: "1733", name: "رنا عادل عمر القدارى", grade: "ممتاز", percentage: "85.76%", hasDebt: false },
+        { id: "1734", name: "مرام محمود صابر صابر", grade: "ممتاز", percentage: "83.55%", hasDebt: true },
+        { id: "1735", name: "استبرق طاهر عبدالله سعد", grade: "ممتاز", percentage: "80.08%", hasDebt: true },
+        { id: "1736", name: "سجى محمد احمد ابوحجر", grade: "ممتاز", percentage: "79.11%", hasDebt: false },
+        { id: "1737", name: "فاطمة جمال على محمد", grade: "ممتاز", percentage: "90.89%", hasDebt: false },
+        { id: "1738", name: "فرح سالم الصالحين بوذهب", grade: "ممتاز", percentage: "88.32%", hasDebt: false },
+        { id: "1739", name: "روان عاشور امحمد اسويرى", grade: "ممتاز", percentage: "86.39%", hasDebt: true },
+        { id: "1740", name: "فتحية محمد عبدالله الورفلي", grade: "ممتاز", percentage: "94.63%", hasDebt: false },
+        { id: "1741", name: "فاطمة عطيه علي ابوحلفايه", grade: "ممتاز", percentage: "81.89%", hasDebt: false },
+        { id: "1742", name: "عائشة على محمد الشيخي", grade: "ممتاز", percentage: "80.47%", hasDebt: true },
+        { id: "1743", name: "موده مجدي عثمان الفيتوري", grade: "ممتاز", percentage: "80.76%", hasDebt: true },
+        { id: "1744", name: "حواء عبدالله امحمد الجبولي", grade: "ممتاز", percentage: "82.63%", hasDebt: true },
+        { id: "1745", name: "فرح طه حسين سعد", grade: "ممتاز", percentage: "93.42%", hasDebt: false },
+        { id: "1746", name: "فاطمة عمر عبدالله عوض", grade: "ممتاز", percentage: "92.82%", hasDebt: true },
+        { id: "1747", name: "مفتاح امراجع ذاوود القبائلي", grade: "ممتاز", percentage: "76.61%", hasDebt: true },
+        { id: "1749", name: "محمد قاسم عبدالجليل مهدى", grade: "ممتاز", percentage: "80.13%", hasDebt: true },
+        { id: "1750", name: "سالمه عبدالسلام عبدالجليل الشريف", grade: "ممتاز", percentage: "82.13%", hasDebt: true },
+        { id: "1753", name: "منير عادل علي ضواقه", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1754", name: "عبدالسميع عبدالله عبدالسميع محمد", grade: "ممتاز", percentage: "80.37%", hasDebt: true },
+        { id: "1755", name: "انس محمد حسن شحيرة", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1759", name: "عبدالرحمن علي عمر الرياني", grade: "ممتاز", percentage: "70.05%", hasDebt: true },
+        { id: "1763", name: "روان عبدالله علي مانيطة", grade: "ممتاز", percentage: "75.03%", hasDebt: true },
+        { id: "1764", name: "ندى عبدالخالق فرج المطوح", grade: "ممتاز", percentage: "77.13%", hasDebt: true },
+        { id: "1765", name: "اسيا عبدالناصر عبدالعليم فرج", grade: "ممتاز", percentage: "85.05%", hasDebt: false },
+        { id: "1766", name: "مودة خميس محمد عبدالجليل", grade: "ممتاز", percentage: "77.82%", hasDebt: true },
+        { id: "1767", name: "احلام محمد عبدالله صالح", grade: "ممتاز", percentage: "82.50%", hasDebt: true },
+        { id: "1768", name: "عبدالله عبدالفتاح عبدالله بوخشيم", grade: "ممتاز", percentage: "68.92%", hasDebt: true },
+        { id: "1772", name: "رقية علي سالم مامي", grade: "ممتاز", percentage: "88.84%", hasDebt: false },
+        { id: "1773", name: "ايه فتحى على الفيتوري", grade: "ممتاز", percentage: "88.79%", hasDebt: true },
+        { id: "1774", name: "اي نور موسى محمد ابوفطيره", grade: "ممتاز", percentage: "75.24%", hasDebt: false },
+        { id: "1775", name: "صفاء محمد فرج محمد زوبي", grade: "ممتاز", percentage: "84.21%", hasDebt: true },
+        { id: "1780", name: "تسنيم ادريس محمد الراشدى", grade: "ممتاز", percentage: "80.39%", hasDebt: true },
+        { id: "1785", name: "مسعود محمد مسعود العماري", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1786", name: "رتاج خميس عباس محمد", grade: "ممتاز", percentage: "81.29%", hasDebt: true },
+        { id: "1789", name: "سليمة صالح صبار الفاخري", grade: "ممتاز", percentage: "87.03%", hasDebt: true },
+        { id: "1790", name: "اسامه سلومه محمد ابراهيم", grade: "ممتاز", percentage: "81.68%", hasDebt: true },
+        { id: "1791", name: "فريحة عبدالمولى امراجع المنفي", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1792", name: "سراج جمعه محمود السعيطى", grade: "ممتاز", percentage: "85.97%", hasDebt: true },
+        { id: "1793", name: "قيس محمد الصادق زوبي", grade: "ممتاز", percentage: "75.08%", hasDebt: false },
+        { id: "1794", name: "عبدالله فتحى عبدالله البركي", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1795", name: "هبه زهير حسن صالح", grade: "ممتاز", percentage: "87.37%", hasDebt: false },
+        { id: "475", name: "صالح سالم صالح مفتاح محمد", grade: "ممتاز", percentage: "74.87%", hasDebt: true },
+        { id: "476", name: "المنتصر بالله عبدالمنعم عمر يعقوب", grade: "ممتاز", percentage: "79.03%", hasDebt: true },
+        { id: "477", name: "عبدالله صلاح محمد المالطى", grade: "ممتاز", percentage: "70.68%", hasDebt: false },
+        { id: "481", name: "ايهاب مفتاح عبدالله المجيديب", grade: "ممتاز", percentage: "77.61%", hasDebt: false },
+        { id: "482", name: "زهير الشريف رمضان اليدرى", grade: "ممتاز", percentage: "84.68%", hasDebt: true },
+        { id: "483", name: "عبدالقادر عبدالله عبدالقادر الشيخى", grade: "ممتاز", percentage: "75.42%", hasDebt: false },
+        { id: "484", name: "عبدالعاطي فرج صالح الفيتوري", grade: "ممتاز", percentage: "78.13%", hasDebt: true },
+        { id: "485", name: "صالحة جمعه ونيس الديلاوي", grade: "ممتاز", percentage: "85.95%", hasDebt: false },
+        { id: "486", name: "نسرين عبدالقادر عبدالرحيم محمدحسين", grade: "ممتاز", percentage: "87.61%", hasDebt: true },
+        { id: "490", name: "ايوب محمد عبدالله عبدالله", grade: "ممتاز", percentage: "71.55%", hasDebt: true },
+        { id: "491", name: "محمود سالم فرج بالقاسم", grade: "ممتاز", percentage: "79.29%", hasDebt: true },
+        { id: "493", name: "عبدالحميد ميلود ابراهيم بوليفة", grade: "ممتاز", percentage: "79.87%", hasDebt: false },
+        { id: "494", name: "شاهين صالح بالحسن عياد", grade: "ممتاز", percentage: "72.34%", hasDebt: false },
+        { id: "495", name: "محمود منصور السيدعبدالموالى", grade: "ممتاز", percentage: "79.87%", hasDebt: false },
+        { id: "496", name: "سراج فرج احمد محمد", grade: "ممتاز", percentage: "80.71%", hasDebt: true },
+        { id: "498", name: "محمد احمد ابراهيم عقيله", grade: "ممتاز", percentage: "82.87%", hasDebt: true },
+        { id: "501", name: "علي عبدالله محمد كونة", grade: "ممتاز", percentage: "69.68%", hasDebt: false },
+        { id: "502", name: "صالح جمعة صالح غيضان", grade: "ممتاز", percentage: "79.21%", hasDebt: true },
+        { id: "503", name: "محمد فتحي مفتاح الغرياني", grade: "ممتاز", percentage: "78.82%", hasDebt: true },
+        { id: "504", name: "ايه على امحمد ادريس", grade: "ممتاز", percentage: "83.47%", hasDebt: true },
+        { id: "505", name: "عطيه احمد يحي القطعاني", grade: "ممتاز", percentage: "80.76%", hasDebt: true },
+        { id: "506", name: "دعاء موسى مفتاح بالكريعات", grade: "ممتاز", percentage: "77.24%", hasDebt: false },
+        { id: "515", name: "فائزة بوبكر عطية عبدالسيد", grade: "ممتاز", percentage: "83.08%", hasDebt: false },
+        { id: "517", name: "مروه هدية علي محمد", grade: "ممتاز", percentage: "88.82%", hasDebt: false },
+        { id: "519", name: "محمد على محمد بخاطره", grade: "ممتاز", percentage: "76.74%", hasDebt: false },
+        { id: "520", name: "بلقيس ايمن مصطفى العالم", grade: "ممتاز", percentage: "81.03%", hasDebt: false },
+        { id: "521", name: "عواطف عبدالسلام فرج محمد دمدوم", grade: "ممتاز", percentage: "89.32%", hasDebt: true },
+        { id: "522", name: "انتصار احمد محمد عمر", grade: "ممتاز", percentage: "85.11%", hasDebt: false },
+        { id: "525", name: "هديل فرج موسى الحاسى", grade: "ممتاز", percentage: "85.24%", hasDebt: true },
+        { id: "526", name: "دعاء جمعه مفتاح اسويري", grade: "ممتاز", percentage: "83.37%", hasDebt: true },
+        { id: "527", name: "نجلاء فرج ميلاد سلامة", grade: "ممتاز", percentage: "87.26%", hasDebt: false },
+        { id: "528", name: "اسماعيل علي محمد بخاطره", grade: "ممتاز", percentage: "76.47%", hasDebt: true },
+        { id: "529", name: "فاطمة ناصر عبدالله صالح", grade: "ممتاز", percentage: "83.21%", hasDebt: true },
+        { id: "531", name: "شريف حسن علي ابساط", grade: "ممتاز", percentage: "78.76%", hasDebt: true },
+        { id: "532", name: "معتز على بلعيد مادي", grade: "ممتاز", percentage: "79.84%", hasDebt: true },
+        { id: "540", name: "شمس جمال مصطفى بورميله", grade: "ممتاز", percentage: "76.18%", hasDebt: false },
+        { id: "541", name: "صابرين ادريس عياد مامي", grade: "ممتاز", percentage: "84.08%", hasDebt: false },
+        { id: "1549", name: "هيام المبروك يوسف الزاوي", grade: "باقي للاعادة", percentage: "0.00%", hasDebt: false },
+        { id: "1517", name: "احمد مرعي خيرالله حمد", grade: "ممتاز", percentage: "52.32%", hasDebt: true },
+        { id: "1546", name: "بثينه هيثم قاسم القذافي", grade: "ممتاز", percentage: "54.54%", hasDebt: true },
+        { id: "1588", name: "احلام رمضان حمد الهبهاب", grade: "ممتاز", percentage: "89.58%", hasDebt: false },
+        { id: "1589", name: "شهد سالم امراجع اجويهم", grade: "ممتاز", percentage: "90.14%", hasDebt: false },
+        { id: "1591", name: "رهام ماهر جمعة عبدالله", grade: "ممتاز", percentage: "59.59%", hasDebt: true },
+        { id: "1592", name: "تسنيم فرج عمر الدرسي", grade: "ممتاز", percentage: "92.86%", hasDebt: false },
+        { id: "1593", name: "منيرة احمد فتحي محمد نوفل", grade: "ممتاز", percentage: "86.93%", hasDebt: false },
+        { id: "1594", name: "ريما مرعى محمد انبيه", grade: "ممتاز", percentage: "82.69%", hasDebt: false },
+        { id: "1595", name: "خديجة صالح خليفه محمد", grade: "ممتاز", percentage: "86.85%", hasDebt: false },
+        { id: "1596", name: "منى على مفتاح العود", grade: "ممتاز", percentage: "83.10%", hasDebt: false },
+        { id: "1597", name: "مرام يوسف ميلاد الذيب", grade: "ممتاز", percentage: "89.14%", hasDebt: true },
+        { id: "1598", name: "ايه غريب مسعود محمد", grade: "ممتاز", percentage: "85.17%", hasDebt: false },
+        { id: "1599", name: "غزاله عبدالقادر عبدالرازق عبدالقادر", grade: "ممتاز", percentage: "54.58%", hasDebt: true },
+        { id: "1600", name: "ياسمينه عمر احمد بشير", grade: "ممتاز", percentage: "51.97%", hasDebt: true },
+        { id: "1601", name: "نجمه رشيد بوحوش العلواني", grade: "ممتاز", percentage: "69.39%", hasDebt: true },
+        { id: "1603", name: "هبة عبدالعزيز فرج مفتاح", grade: "ممتاز", percentage: "87.63%", hasDebt: false },
+        { id: "1604", name: "عبدالرحمن احمد مفتاح الكاديكى", grade: "ممتاز", percentage: "53.39%", hasDebt: true },
+        { id: "1605", name: "الاء عبدالسلام علي مفتاح", grade: "ممتاز", percentage: "91.25%", hasDebt: true },
+        { id: "1606", name: "اروى سعد خليفة سالم", grade: "ممتاز", percentage: "88.90%", hasDebt: true },
+        { id: "1607", name: "هاجر رمضان حمد الهبهاب", grade: "ممتاز", percentage: "92.81%", hasDebt: false },
+        { id: "1609", name: "نعيمة مسعود فرحات الفخاخري", grade: "ممتاز", percentage: "67.02%", hasDebt: true },
+        { id: "1610", name: "هبه عبدالرحيم ذاود الحوتي", grade: "ممتاز", percentage: "80.20%", hasDebt: true },
+        { id: "1611", name: "اسماء جمعه رحيل العماري", grade: "ممتاز", percentage: "91.86%", hasDebt: true },
+        { id: "1612", name: "اصاله منير عبدالقادر جديوه", grade: "ممتاز", percentage: "93.69%", hasDebt: false },
+        { id: "1613", name: "رنيم فتحى مصطفى العنيزى", grade: "ممتاز", percentage: "89.59%", hasDebt: true },
+        { id: "1614", name: "حنان سالم فرج العمامي", grade: "راسب", percentage: "46.39%", hasDebt: true },
+        { id: "1615", name: "اسراء فرج ونيس علي", grade: "ممتاز", percentage: "88.83%", hasDebt: true },
+        { id: "1616", name: "زينب مفتاح حمد التواتي", grade: "ممتاز", percentage: "85.81%", hasDebt: false },
+        { id: "1617", name: "بشرى فرج سليمان العنيزي", grade: "ممتاز", percentage: "90.19%", hasDebt: false },
+        { id: "1618", name: "حنين ناظم محمد الجراري", grade: "ممتاز", percentage: "53.29%", hasDebt: true },
+        { id: "1620", name: "ايوب المهدي احمد سعد", grade: "ممتاز", percentage: "55.66%", hasDebt: true },
+        { id: "1622", name: "عبدالله علي عبدالله الضراط", grade: "ممتاز", percentage: "80.71%", hasDebt: true },
+        { id: "1623", name: "يوسف احمد يوسف الزائدى", grade: "ممتاز", percentage: "74.66%", hasDebt: true },
+        { id: "1624", name: "محمد الوداوي محمد اشتيوي", grade: "ممتاز", percentage: "54.27%", hasDebt: true },
+        { id: "1625", name: "ولاء حافظ عبدالعزيز نجم", grade: "ممتاز", percentage: "56.49%", hasDebt: true },
+        { id: "1626", name: "رمضان عاشور رمضان بوشعاله", grade: "راسب", percentage: "47.81%", hasDebt: true },
+        { id: "1627", name: "حسين فرج صالح حسين سويسى", grade: "ممتاز", percentage: "80.20%", hasDebt: false },
+        { id: "1628", name: "ايمن ميلاد امحمد المزوغي", grade: "ممتاز", percentage: "55.69%", hasDebt: true },
+        { id: "1629", name: "محمد فرج احمد بن دردف", grade: "ممتاز", percentage: "52.88%", hasDebt: true },
+        { id: "1630", name: "عماد على محمد ابوشناف", grade: "ممتاز", percentage: "53.54%", hasDebt: true },
+        { id: "1631", name: "هنيبال اسماعيل علي الجالي", grade: "ممتاز", percentage: "53.19%", hasDebt: true },
+        { id: "1632", name: "محمد علي اشتيوى الورفلي", grade: "ممتاز", percentage: "52.81%", hasDebt: true },
+        { id: "1633", name: "سعد منصور سعد منصور", grade: "ممتاز", percentage: "50.68%", hasDebt: true },
+        { id: "1634", name: "فركاش ادهم علي فركاش", grade: "ممتاز", percentage: "51.98%", hasDebt: true },
+        { id: "1635", name: "صفوان عيسي جادالله مسعود", grade: "ممتاز", percentage: "54.22%", hasDebt: true },
+        { id: "1636", name: "عبدالرحمن على عمر النائلى", grade: "ممتاز", percentage: "50.29%", hasDebt: true },
+        { id: "1637", name: "عبدالرحمن صميدة احمد صميدة", grade: "ممتاز", percentage: "71.98%", hasDebt: true },
+        { id: "1638", name: "قاسم معتوق عبدالله على", grade: "ممتاز", percentage: "50.76%", hasDebt: true },
+        { id: "1639", name: "معاذ بن جبل خالد الصديق بن جلول", grade: "ممتاز", percentage: "52.20%", hasDebt: true },
+        { id: "1640", name: "عبدالحميد عثمان على المتسلي", grade: "ممتاز", percentage: "51.47%", hasDebt: true },
+        { id: "1641", name: "احمد محمد مفتاح الشيخي", grade: "ممتاز", percentage: "57.12%", hasDebt: true },
+        { id: "1642", name: "علي عادل صالح امخاطر", grade: "ممتاز", percentage: "52.46%", hasDebt: true },
+        { id: "1643", name: "خالد عبدالسلام مازق عبدالقادر", grade: "راسب", percentage: "48.37%", hasDebt: true },
+        { id: "1644", name: "نور رمضان سالم حسين بورياقه", grade: "ممتاز", percentage: "88.12%", hasDebt: false },
+        { id: "1645", name: "احمد مسعود مشحود عوض", grade: "ممتاز", percentage: "58.81%", hasDebt: true },
+        { id: "1665", name: "شهد غيث امراجع العبيدي", grade: "ممتاز", percentage: "83.36%", hasDebt: false },
+        { id: "1666", name: "فرح مرعي يونس سلامه صابر", grade: "ممتاز", percentage: "77.22%", hasDebt: false },
+        { id: "1667", name: "شيماء محمد رزق شحاته حمد", grade: "ممتاز", percentage: "89.75%", hasDebt: true },
+        { id: "1668", name: "انس عثمان عطية التاورغي", grade: "ممتاز", percentage: "54.20%", hasDebt: true },
+        { id: "1671", name: "ابراهيم محمد ابراهيم الطيب", grade: "ممتاز", percentage: "55.90%", hasDebt: true },
+        { id: "1675", name: "اسامه رزق شحاته حمد", grade: "ممتاز", percentage: "54.15%", hasDebt: true },
+        { id: "1679", name: "اميره مرعي اسماعيل ابراهيم", grade: "ممتاز", percentage: "70.78%", hasDebt: false },
+        { id: "1680", name: "اماني السنوسي عمر المجبري", grade: "ممتاز", percentage: "55.59%", hasDebt: true },
+        { id: "1681", name: "سالمة عصام ابراهيم الجحاوي", grade: "ممتاز", percentage: "52.47%", hasDebt: true },
+        { id: "1682", name: "ياسمينة حسن محمد عوض حريب", grade: "راسب", percentage: "49.36%", hasDebt: true },
+        { id: "1683", name: "محمد عبدالسلام على قصيل", grade: "راسب", percentage: "49.37%", hasDebt: true },
+        { id: "1684", name: "الاء حسين ادم بالعيد", grade: "ممتاز", percentage: "51.24%", hasDebt: true },
+        { id: "1685", name: "اسراء عمر سليمان التركي", grade: "ممتاز", percentage: "87.39%", hasDebt: false },
+        { id: "1686", name: "شذى على حمد على", grade: "ممتاز", percentage: "53.24%", hasDebt: true },
+        { id: "1687", name: "عبدالمهيمن رجب عبدالله الفيتوري", grade: "ممتاز", percentage: "51.34%", hasDebt: true },
+        { id: "1688", name: "انس على فرج العمامي", grade: "ممتاز", percentage: "53.12%", hasDebt: true },
+        { id: "1689", name: "حمزه خالد عاشور صالح", grade: "ممتاز", percentage: "84.22%", hasDebt: true },
+        { id: "1694", name: "منعم امبارك عبدالمولى التاجوري", grade: "ممتاز", percentage: "53.14%", hasDebt: true },
+        { id: "1696", name: "عائشة عزالدين محمد موسى", grade: "ممتاز", percentage: "55.80%", hasDebt: true },
+        { id: "1697", name: "ابرار جبريل صالح ادم", grade: "ممتاز", percentage: "78.25%", hasDebt: false },
+        { id: "1698", name: "نجاح مفتاح ممحمود بن يونس", grade: "ممتاز", percentage: "53.10%", hasDebt: true },
+        { id: "1699", name: "انتصار سليمان سعد هاشم", grade: "ممتاز", percentage: "50.53%", hasDebt: true },
+        { id: "1796", name: "بشرى ناجى اسماعيل المجذوب", grade: "ممتاز", percentage: "83.29%", hasDebt: true },
+        { id: "2028", name: "دارين عصام الدين محمد بوشعاله", grade: "ممتاز", percentage: "52.97%", hasDebt: true },
+        { id: "2030", name: "محمد على مفتاح الفرجاني", grade: "ممتاز", percentage: "53.75%", hasDebt: true },
+        { id: "2032", name: "على فرج محمد سالم", grade: "راسب", percentage: "47.85%", hasDebt: true },
+        { id: "2035", name: "محمود مفتاح ربيع مفتاح", grade: "ممتاز", percentage: "51.54%", hasDebt: true },
+        { id: "2036", name: "محمد مفتاح ربيع مفتاح", grade: "ممتاز", percentage: "50.71%", hasDebt: true },
+        { id: "2037", name: "لبنى صالح رافع الرعيض", grade: "ممتاز", percentage: "52.03%", hasDebt: true },
+        { id: "2038", name: "هناء صالح رافع الرعيض", grade: "ممتاز", percentage: "55.41%", hasDebt: true },
+        { id: "422", name: "فيروز محمود راف الله محمدى", grade: "ممتاز", percentage: "61.05%", hasDebt: false },
+        { id: "423", name: "منى حسن ابراهيم يونس", grade: "ممتاز", percentage: "72.03%", hasDebt: false },
+        { id: "424", name: "الاء خالد محمد بوشعاله", grade: "ممتاز", percentage: "72.02%", hasDebt: false },
+        { id: "427", name: "عبدالله سيد عبده محمد عبدالحكيم", grade: "ممتاز", percentage: "72.54%", hasDebt: true },
+        { id: "428", name: "ايمن خالد عبدالله امراجع", grade: "ممتاز", percentage: "68.10%", hasDebt: true },
+        { id: "429", name: "فاطمة محمد مصباح العيويص", grade: "ممتاز", percentage: "55.49%", hasDebt: true },
+        { id: "431", name: "سعاد محمد صالح المغيربي", grade: "ممتاز", percentage: "53.63%", hasDebt: true },
+        { id: "432", name: "محمد مرعي عبدالله محمد المغربي", grade: "راسب", percentage: "48.85%", hasDebt: true },
+        { id: "433", name: "علي عبدالسيد محمد ابراهيم", grade: "راسب", percentage: "48.05%", hasDebt: true },
+        { id: "437", name: "سراج الدين عبدالله الزروق العجيلي", grade: "ممتاز", percentage: "50.07%", hasDebt: true },
+        { id: "439", name: "اية صالح رمضان الحنبولى", grade: "ممتاز", percentage: "50.39%", hasDebt: true },
+        { id: "441", name: "احمد مصطفي احمد حسان", grade: "ممتاز", percentage: "80.53%", hasDebt: true },
+        { id: "442", name: "سالمين صابر عبدالرحمن منصور", grade: "ممتاز", percentage: "86.64%", hasDebt: false },
+        { id: "443", name: "هانم ابوراوى عبدالرحمن القبائلى", grade: "ممتاز", percentage: "92.44%", hasDebt: false },
+        { id: "444", name: "مرام محمد طاهر سكران", grade: "ممتاز", percentage: "82.32%", hasDebt: false },
+        { id: "445", name: "مناره الاسلام مفتاح محمد ادريس", grade: "ممتاز", percentage: "82.90%", hasDebt: false },
+        { id: "446", name: "عمر احمد محمد احمد", grade: "ممتاز", percentage: "56.47%", hasDebt: true },
+        { id: "449", name: "هاجر خالد سعيد رجب", grade: "ممتاز", percentage: "79.42%", hasDebt: false },
+        { id: "451", name: "فرج عبدالله فرج العوامي", grade: "راسب", percentage: "45.32%", hasDebt: true },
+        { id: "458", name: "عبدالرؤوف عبدالله حسن الهدله", grade: "ممتاز", percentage: "52.80%", hasDebt: true },
+        { id: "459", name: "عماد مجدى زروق امحمد", grade: "ممتاز", percentage: "50.85%", hasDebt: true },
+        { id: "460", name: "رنا سعد ادم عمر", grade: "ممتاز", percentage: "52.54%", hasDebt: true },
+        { id: "461", name: "عبدالكريم فرج عبدالكريم قادير", grade: "ممتاز", percentage: "68.19%", hasDebt: true },
+        { id: "462", name: "ايه حمد جمعه بوكمار", grade: "ممتاز", percentage: "52.92%", hasDebt: true },
+        { id: "463", name: "ايمان ثابت عبدالله البناتي", grade: "ممتاز", percentage: "74.83%", hasDebt: true },
+        { id: "465", name: "سالمة سالم عبدالقادر البرعصي", grade: "ممتاز", percentage: "84.59%", hasDebt: false },
+        { id: "466", name: "ندى ناجي سعيد المغربي", grade: "ممتاز", percentage: "88.51%", hasDebt: false },
+        { id: "469", name: "رامى حمزه مصطفى خليفة ميلاد", grade: "راسب", percentage: "49.29%", hasDebt: true },
+        { id: "470", name: "سالم حسين ادم الفضلي", grade: "ممتاز", percentage: "52.68%", hasDebt: true },
+        { id: "471", name: "معاذ عبدالله علي ضوء", grade: "ممتاز", percentage: "52.88%", hasDebt: true },
+        { id: "472", name: "مفتاح نوري مفتاح المسلاتي", grade: "ممتاز", percentage: "53.44%", hasDebt: true },
+        { id: "473", name: "على ابراهيم على سعيد على", grade: "راسب", percentage: "48.02%", hasDebt: true },
+        { id: "474", name: "عبدالله السائح امحمد ابراهيم", grade: "ممتاز", percentage: "50.46%", hasDebt: true },
+        { id: "1693", name: "اسراء فتحي محمد فتحي", grade: "ممتاز", percentage: "88.66%", hasDebt: false },
+        { id: "297", name: "هبة أبراهيم عوض السلاوي", grade: "ممتاز", percentage: "84.25%", hasDebt: true },
+        { id: "386", name: "مؤيد مفتاح محمد الفيتوري", grade: "ممتاز", percentage: "85.05%", hasDebt: true },
+        { id: "426", name: "سعاد محمود مفتاح المجريسى", grade: "ممتاز", percentage: "85.51%", hasDebt: true },
+        { id: "448", name: "مبروكة عبدالرحيم بن خيال", grade: "ممتاز", percentage: "79.44%", hasDebt: false },
+        { id: "1458", name: "احمد طالب موسى الزواوي", grade: "ممتاز", percentage: "64.76%", hasDebt: true },
+        { id: "1518", name: "سيف الله فتحي بلعيد ناجى", grade: "ممتاز", percentage: "63.28%", hasDebt: true },
+        { id: "1519", name: "محمد خالد الصديق بن جلول", grade: "ممتاز", percentage: "67.12%", hasDebt: true },
+        { id: "1520", name: "علي ميلاد عمر عطيه", grade: "ممتاز", percentage: "62.80%", hasDebt: true },
+        { id: "1521", name: "ايناس محمد ميلاد القداري", grade: "ممتاز", percentage: "70.82%", hasDebt: true },
+        { id: "1522", name: "عبدالمؤمن حبيب احمد عربي", grade: "ممتاز", percentage: "71.39%", hasDebt: true },
+        { id: "1523", name: "علي محمد رمضان بورزيزه", grade: "ممتاز", percentage: "66.78%", hasDebt: true },
+        { id: "1524", name: "عبدالرحمن محمود خميس عثمان", grade: "ممتاز", percentage: "60.93%", hasDebt: true },
+        { id: "1525", name: "ابراهيم يوسف المهدي العجيلي", grade: "ممتاز", percentage: "71.68%", hasDebt: true },
+        { id: "1526", name: "مهند مفتاح حمد قرقوم", grade: "ممتاز", percentage: "66.98%", hasDebt: true },
+        { id: "1527", name: "رناد حمزة بوبكر مفتاح", grade: "ممتاز", percentage: "71.27%", hasDebt: true },
+        { id: "1528", name: "محمد احمد سعيد الحميدى", grade: "ممتاز", percentage: "65.71%", hasDebt: true },
+        { id: "1529", name: "يوسف مرعي يوسف حمد شنيب", grade: "ممتاز", percentage: "64.03%", hasDebt: true },
+        { id: "1530", name: "علي ناصر علي العقوري", grade: "ممتاز", percentage: "59.30%", hasDebt: true },
+        { id: "1531", name: "محمد حمد صالح يونس", grade: "ممتاز", percentage: "66.19%", hasDebt: true },
+        { id: "1532", name: "هديل عيسى سليمان موسى", grade: "ممتاز", percentage: "84.26%", hasDebt: false },
+        { id: "1533", name: "مبروكة محمود عامر الربيعي", grade: "ممتاز", percentage: "71.06%", hasDebt: true },
+        { id: "1534", name: "مسعودة عثمان محمد بالقاسم", grade: "ممتاز", percentage: "75.15%", hasDebt: true },
+        { id: "1535", name: "على عزالدين على ابوشعالة", grade: "ممتاز", percentage: "60.67%", hasDebt: true },
+        { id: "1537", name: "اسماء عيسي محمود المريمي", grade: "ممتاز", percentage: "66.14%", hasDebt: true },
+        { id: "1538", name: "دنيا بن عيسى على السلطنى", grade: "ممتاز", percentage: "68.93%", hasDebt: true },
+        { id: "1541", name: "عمر مصطفى محمد القماطي", grade: "ممتاز", percentage: "64.30%", hasDebt: true },
+        { id: "1542", name: "هدى منصور سعد محمد", grade: "ممتاز", percentage: "77.55%", hasDebt: false },
+        { id: "1545", name: "امنه فرج مفتاح الاحول", grade: "ممتاز", percentage: "77.73%", hasDebt: true },
+        { id: "1547", name: "دلال منصور صالح العبار", grade: "ممتاز", percentage: "84.23%", hasDebt: true },
+        { id: "1548", name: "مرام امراجع يونس طيب", grade: "ممتاز", percentage: "84.62%", hasDebt: false },
+        { id: "1550", name: "مها نصر محمد الفارسي", grade: "ممتاز", percentage: "83.86%", hasDebt: true },
+        { id: "1551", name: "صالحه نصر محمد الفارسي", grade: "ممتاز", percentage: "81.36%", hasDebt: true },
+        { id: "1552", name: "غالية محمد سالم المشاي", grade: "ممتاز", percentage: "82.36%", hasDebt: false },
+        { id: "1553", name: "انوار امبارك عبدالسلام امحمد", grade: "ممتاز", percentage: "88.96%", hasDebt: false },
+        { id: "1554", name: "امل عبدالعزيز الهادي ضوء", grade: "ممتاز", percentage: "83.06%", hasDebt: true },
+        { id: "1556", name: "حمزه فوزي عبدالسلام النائلي", grade: "ممتاز", percentage: "66.49%", hasDebt: true },
+        { id: "1563", name: "وريدة صالح مسعود ملاس", grade: "ممتاز", percentage: "72.38%", hasDebt: true },
+        { id: "1564", name: "هبة سعيد محمد الشيخي", grade: "ممتاز", percentage: "88.67%", hasDebt: true },
+        { id: "1565", name: "عبدالرحمن عبدالباسط حمد مفتاح", grade: "ممتاز", percentage: "65.34%", hasDebt: true },
+        { id: "1567", name: "ابراهيم عبدالسلام علي اطوير", grade: "ممتاز", percentage: "67.02%", hasDebt: true },
+        { id: "1568", name: "محمد طارق حسين حمد", grade: "ممتاز", percentage: "67.21%", hasDebt: true },
+        { id: "1569", name: "رغد عبدالسلام محمد الغرياني", grade: "ممتاز", percentage: "82.10%", hasDebt: true },
+        { id: "1570", name: "محمد سالم محمد حيدر", grade: "ممتاز", percentage: "67.16%", hasDebt: true },
+        { id: "1571", name: "احمد شريف عبدالجليل صالح", grade: "ممتاز", percentage: "66.00%", hasDebt: true },
+        { id: "1573", name: "عبدالله جعوان عبدالنبى يونس", grade: "ممتاز", percentage: "64.37%", hasDebt: true },
+        { id: "1574", name: "كمال على محمد عبدالسلام", grade: "ممتاز", percentage: "63.22%", hasDebt: true },
+        { id: "1576", name: "عبدالمالك ادريس على الككلى", grade: "ممتاز", percentage: "63.33%", hasDebt: true },
+        { id: "1577", name: "يوسف ابوبكر الفرجاني زوبي", grade: "ممتاز", percentage: "65.76%", hasDebt: true },
+        { id: "1578", name: "فرج عياد فرج الترهوني", grade: "ممتاز", percentage: "62.64%", hasDebt: true },
+        { id: "1579", name: "ضرار بوبكر محمد عياد", grade: "ممتاز", percentage: "62.28%", hasDebt: true },
+        { id: "1580", name: "المهدي رجب عبدالله النعاس", grade: "ممتاز", percentage: "64.17%", hasDebt: true },
+        { id: "1695", name: "نورا مفتاح فرج مفتاح", grade: "ممتاز", percentage: "92.47%", hasDebt: false },
+        { id: "1757", name: "هبة صالح ابوبكر الهدار", grade: "ممتاز", percentage: "88.19%", hasDebt: false },
+        { id: "2023", name: "هديل عثمان محمد عثمان", grade: "ممتاز", percentage: "65.76%", hasDebt: true },
+        { id: "2025", name: "احمد فضيل علي سالم", grade: "ممتاز", percentage: "64.90%", hasDebt: true },
+        { id: "2026", name: "فتحية احمد بشير محمد", grade: "ممتاز", percentage: "64.46%", hasDebt: true },
+        { id: "2027", name: "عادل علي يونس احميدة", grade: "ممتاز", percentage: "66.94%", hasDebt: true },
+        { id: "295", name: "سعد محمد سعد امحمد", grade: "ممتاز", percentage: "65.99%", hasDebt: true },
+        { id: "296", name: "سعد مرتجع سعد سعد", grade: "ممتاز", percentage: "73.35%", hasDebt: false },
+        { id: "377", name: "علي محمد عبدالله البس", grade: "ممتاز", percentage: "62.71%", hasDebt: true },
+        { id: "384", name: "محمد ناصر بشير محمد", grade: "ممتاز", percentage: "67.04%", hasDebt: true },
+        { id: "385", name: "عزيزة اقدورة فرج سالم", grade: "ممتاز", percentage: "71.93%", hasDebt: true },
+        { id: "390", name: "أبتسام محمد حسين اكويري", grade: "ممتاز", percentage: "64.27%", hasDebt: true },
+        { id: "392", name: "اسامة حمد جمعة بوكمار", grade: "ممتاز", percentage: "66.12%", hasDebt: true },
+        { id: "397", name: "منذر فتحي محمد بورزيزه", grade: "ممتاز", percentage: "66.34%", hasDebt: true },
+        { id: "398", name: "انتصار ياسين عبدالحميد على", grade: "ممتاز", percentage: "64.73%", hasDebt: true },
+        { id: "401", name: "سليم جبريل عمر اشنينة", grade: "ممتاز", percentage: "71.51%", hasDebt: false },
+        { id: "417", name: "عائشة الهائن مصباح الفاخري", grade: "ممتاز", percentage: "75.97%", hasDebt: true },
+        { id: "419", name: "مريم عادل محمد الدبيبيغ", grade: "ممتاز", percentage: "68.91%", hasDebt: true },
+        { id: "1455", name: "احمد منصور محمد ابوجرادة", grade: "ممتاز", percentage: "81.36%", hasDebt: true },
+        { id: "1456", name: "ونيس محمد اللافي البرغثي", grade: "ممتاز", percentage: "77.28%", hasDebt: true },
+        { id: "1461", name: "عبدالله سالم عبدالله الشلبي", grade: "ممتاز", percentage: "76.00%", hasDebt: true },
+        { id: "1462", name: "رويدة مصطفي محمد الخمسي", grade: "ممتاز", percentage: "86.42%", hasDebt: false },
+        { id: "1463", name: "حور سعيدحمد عبدالعزيز", grade: "ممتاز", percentage: "77.51%", hasDebt: true },
+        { id: "1464", name: "خديجة إبرهيم مؤمن آده", grade: "ممتاز", percentage: "81.01%", hasDebt: false },
+        { id: "1466", name: "نصر احمد نصر محمد", grade: "ممتاز", percentage: "77.65%", hasDebt: true },
+        { id: "1467", name: "خديجة محمود عمران الوافي", grade: "ممتاز", percentage: "90.99%", hasDebt: false },
+        { id: "1468", name: "فاطمة احمد سعد مسعود", grade: "ممتاز", percentage: "79.05%", hasDebt: true },
+        { id: "1469", name: "فاطمة فتحى سعد الفزاني", grade: "ممتاز", percentage: "77.50%", hasDebt: true },
+        { id: "1470", name: "حازم عزالدين احمد الغرابي", grade: "ممتاز", percentage: "77.14%", hasDebt: true },
+        { id: "1471", name: "نواره توقى عمر بندى", grade: "ممتاز", percentage: "82.44%", hasDebt: false },
+        { id: "1472", name: "هدير مصطفى سالم اسويكر", grade: "ممتاز", percentage: "85.79%", hasDebt: false },
+        { id: "1492", name: "وليد فتحي شطيب عبدالله شطيب", grade: "ممتاز", percentage: "74.18%", hasDebt: false },
+        { id: "1494", name: "اميره خالد الشريف العمروني", grade: "ممتاز", percentage: "91.77%", hasDebt: true },
+        { id: "1496", name: "نادر موسى ادم الحاسي", grade: "ممتاز", percentage: "76.74%", hasDebt: true },
+        { id: "1497", name: "اسلام مصطفى علي جعفر", grade: "ممتاز", percentage: "76.20%", hasDebt: false },
+        { id: "1499", name: "ساجده ابراهيم عمر على", grade: "ممتاز", percentage: "76.21%", hasDebt: true },
+        { id: "1500", name: "جمليه يوسف امقاوي على", grade: "ممتاز", percentage: "87.08%", hasDebt: false },
+        { id: "1503", name: "علي منصور محمد بوجرادة", grade: "ممتاز", percentage: "79.96%", hasDebt: true },
+        { id: "1506", name: "سميه محمد على يوسف", grade: "ممتاز", percentage: "81.21%", hasDebt: false },
+        { id: "1507", name: "جمعه رمضان سعد بوشعالة", grade: "ممتاز", percentage: "75.44%", hasDebt: false },
+        { id: "2024", name: "عبدالرحمن رجب فضل فضل", grade: "ممتاز", percentage: "75.12%", hasDebt: true },
+        { id: "347", name: "وائل الكونى ابوبكر الزوالى", grade: "ممتاز", percentage: "75.21%", hasDebt: true },
+        { id: "348", name: "رجعه عبدالرسول ابوالقاسم محمد", grade: "ممتاز", percentage: "76.49%", hasDebt: true },
+        { id: "350", name: "محمد فيصل عدنان العنيزى", grade: "ممتاز", percentage: "78.71%", hasDebt: true },
+        { id: "352", name: "عائشة رمضان سالم الفيتوري", grade: "ممتاز", percentage: "72.96%", hasDebt: true },
+        { id: "354", name: "دينا محمد المهدي يوسف", grade: "ممتاز", percentage: "76.18%", hasDebt: true },
+        { id: "369", name: "ايمن عثمان سعد البرعصي", grade: "ممتاز", percentage: "78.45%", hasDebt: true },
+        { id: "436", name: "هندا رمضان عبدالسلام الفرجاني", grade: "ممتاز", percentage: "91.67%", hasDebt: true },
+        { id: "440", name: "نادين مصطفي محمد قصيبات", grade: "ممتاز", percentage: "92.42%", hasDebt: false },
+        { id: "453", name: "العنود رزق محمد مفتاح", grade: "ممتاز", percentage: "90.84%", hasDebt: false },
+        { id: "464", name: "غاليه عوض مفتاح منصور العمامي", grade: "ممتاز", percentage: "93.98%", hasDebt: true },
+        { id: "467", name: "اسيل ناصر رجب الخرش", grade: "ممتاز", percentage: "92.89%", hasDebt: true },
+        { id: "480", name: "مروة خالد محمد الرعيض", grade: "ممتاز", percentage: "87.11%", hasDebt: false },
+        { id: "516", name: "وعد سليم محمد محمد", grade: "ممتاز", percentage: "86.20%", hasDebt: true },
+        { id: "1583", name: "ابراهيم عادل حسن المنفى", grade: "ممتاز", percentage: "81.85%", hasDebt: false },
+        { id: "1585", name: "محمد ناصر محمد محمد", grade: "ممتاز", percentage: "87.57%", hasDebt: true },
+        { id: "1586", name: "عاشور عطية علي الفيتوري", grade: "ممتاز", percentage: "81.17%", hasDebt: false },
+        { id: "1587", name: "سالمه رمضان خليفة العمامي", grade: "ممتاز", percentage: "82.55%", hasDebt: true },
+        { id: "1621", name: "اسامه بوبكر محمود العوج", grade: "ممتاز", percentage: "85.40%", hasDebt: true },
+        { id: "1674", name: "مرعى مصطفى مرعى منانى", grade: "ممتاز", percentage: "81.40%", hasDebt: true },
+        { id: "1776", name: "دنيا ادريس بوغراره عبدالقادر بوغراره", grade: "ممتاز", percentage: "81.70%", hasDebt: true },
+        { id: "1777", name: "دينا ادريس بوغراره عبدالقادر بوغراره", grade: "ممتاز", percentage: "84.19%", hasDebt: true },
+        { id: "2034", name: "منيرة مفتاح ربيع مفتاح", grade: "ممتاز", percentage: "84.25%", hasDebt: true },
+        { id: "430", name: "شهد حسن بشير قرمان", grade: "ممتاز", percentage: "81.15%", hasDebt: true },
+        { id: "457", name: "احمد صلاح محمد الشيخي", grade: "ممتاز", percentage: "77.93%", hasDebt: true },
+        { id: "355", name: "اريج ناجي محمد مختار الكرغلي", grade: "ممتاز", percentage: "68.75%", hasDebt: true },
+        { id: "363", name: "مالك يوسف بوفراج محمد", grade: "ممتاز", percentage: "75.00%", hasDebt: true },
+        { id: "365", name: "يحى محمد المبروك ميغه", grade: "ممتاز", percentage: "70.84%", hasDebt: true }
+    ];
+
+    function searchResult() {
+        const query = document.getElementById('searchInput').value.trim();
+        const resultBox = document.getElementById('resultBox');
+        
+        if (query === "") {
+            resultBox.style.display = "block";
+            resultBox.className = "result-box error";
+            resultBox.innerHTML = "الرجاء إدخال رقم القيد أو الاسم للبحث.";
+            return;
+        }
+
+        // البحث في قاعدة البيانات بمطابقة رقم القيد أو الاسم
+        const student = studentsDatabase.find(s => s.id === query || s.name === query);
+
+        if (!student) {
+            resultBox.style.display = "block";
+            resultBox.className = "result-box error";
+            resultBox.innerHTML = "عذراً، لم يتم العثور على طالب بهذا الاسم الكامل أو رقم القيد. يرجى التأكد من كتابة الاسم كما هو في الكشوفات.";
+            return;
+        }
+
+        // التحقق من وجود قسط مالي (حجب النتيجة)
+        if (student.hasDebt) {
+            resultBox.style.display = "block";
+            resultBox.className = "result-box error";
+            resultBox.innerHTML = `عذراً يا <strong>${student.name}</strong>، تعذر إظهار النتيجة لوجود أقساط مالية مستحقة أو مشكلة إدارية. يرجى مراجعة الإدارة.`;
+            return;
+        }
+
+        // إظهار النتيجة في حال لم يكن عليه أقساط
+        resultBox.style.display = "block";
+        resultBox.className = "result-box success";
+        resultBox.innerHTML = `
+            <strong>نتيجة الطالب:</strong><br>
+            - الاسم: ${student.name}<br>
+            - رقم القيد: ${student.id}<br>
+            - التقدير: ${student.grade}<br>
+            - النسبة المئوية: ${student.percentage}
+        `;
+    }
+</script>
+
+</body>
+</html>
